@@ -139,3 +139,6 @@ dmypy.json
 .pyre/
 /pretrained/
 .idea
+
+# conda env
+env-NSGA
