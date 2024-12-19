@@ -6,8 +6,8 @@ import torchvision
 import torch.utils.data
 import torchvision.transforms as transforms
 
-from ofa.utils.my_dataloader import MyRandomResizedCrop, MyDistributedSampler
-from ofa.imagenet_classification.data_providers.base_provider import DataProvider
+from ofa.imagenet_codebase.data_providers.base_provider import MyRandomResizedCrop, MyDistributedSampler
+from ofa.imagenet_codebase.data_providers.base_provider import DataProvider
 
 
 class CIFAR10DataProvider(DataProvider):
@@ -121,13 +121,13 @@ class CIFAR10DataProvider(DataProvider):
     def train_dataset(self, _transforms):
         # dataset = datasets.ImageFolder(self.train_path, _transforms)
         dataset = torchvision.datasets.CIFAR10(
-            root=self.valid_path, train=True, download=False, transform=_transforms)
+            root=self.valid_path, train=True, download=True, transform=_transforms)
         return dataset
     
     def test_dataset(self, _transforms):
         # dataset = datasets.ImageFolder(self.valid_path, _transforms)
         dataset = torchvision.datasets.CIFAR10(
-            root=self.valid_path, train=False, download=False, transform=_transforms)
+            root=self.valid_path, train=False, download=True, transform=_transforms)
         return dataset
     
     @property
@@ -337,13 +337,13 @@ class CIFAR100DataProvider(DataProvider):
     def train_dataset(self, _transforms):
         # dataset = datasets.ImageFolder(self.train_path, _transforms)
         dataset = torchvision.datasets.CIFAR100(
-            root=self.valid_path, train=True, download=False, transform=_transforms)
+            root=self.valid_path, train=True, download=True, transform=_transforms)
         return dataset
 
     def test_dataset(self, _transforms):
         # dataset = datasets.ImageFolder(self.valid_path, _transforms)
         dataset = torchvision.datasets.CIFAR100(
-            root=self.valid_path, train=False, download=False, transform=_transforms)
+            root=self.valid_path, train=False, download=True, transform=_transforms)
         return dataset
 
     @property
@@ -553,13 +553,13 @@ class CINIC10DataProvider(DataProvider):
     def train_dataset(self, _transforms):
         dataset = torchvision.datasets.ImageFolder(self.train_path, transform=_transforms)
         # dataset = torchvision.datasets.CIFAR10(
-        #     root=self.valid_path, train=True, download=False, transform=_transforms)
+        #     root=self.valid_path, train=True, download=True, transform=_transforms)
         return dataset
 
     def test_dataset(self, _transforms):
         dataset = torchvision.datasets.ImageFolder(self.valid_path, transform=_transforms)
         # dataset = torchvision.datasets.CIFAR10(
-        #     root=self.valid_path, train=False, download=False, transform=_transforms)
+        #     root=self.valid_path, train=False, download=True, transform=_transforms)
         return dataset
 
     @property

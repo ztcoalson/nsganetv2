@@ -6,8 +6,8 @@ import torchvision
 import torch.utils.data
 import torchvision.transforms as transforms
 
-from ofa.utils.my_dataloader import MyRandomResizedCrop, MyDistributedSampler
-from ofa.imagenet_classification.data_providers.base_provider import DataProvider
+from ofa.imagenet_codebase.data_providers.base_provider import MyRandomResizedCrop, MyDistributedSampler
+from ofa.imagenet_codebase.data_providers.base_provider import DataProvider
 
 
 class STL10DataProvider(DataProvider):

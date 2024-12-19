@@ -152,9 +152,10 @@ class OFAEvaluator:
         if n_epochs > 0:
             # for datasets other than the one supernet was trained on (ImageNet)
             # a few epochs of training need to be applied
-            subnet.reset_classifier(
+            NSGANetV2.reset_classifier(
+                subnet,
                 last_channel=subnet.classifier.in_features,
-                n_classes=run_config.data_provider.n_classes, dropout_rate=cfgs.drop_rate)
+                n_classes=run_config.data_provider.n_classes, dropout_rate=0.2)
 
         run_manager = RunManager(log_dir, subnet, run_config, init=False)
         if reset_running_statistics:

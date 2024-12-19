@@ -12,8 +12,8 @@ import torch.utils.data
 import torchvision.transforms as transforms
 from torchvision.datasets.folder import default_loader
 
-from ofa.utils.my_dataloader import MyRandomResizedCrop, MyDistributedSampler
-from ofa.imagenet_classification.data_providers.base_provider import DataProvider
+from ofa.imagenet_codebase.data_providers.base_provider import MyRandomResizedCrop, MyDistributedSampler
+from ofa.imagenet_codebase.data_providers.base_provider import DataProvider
 
 
 def make_dataset(dir, image_ids, targets):
