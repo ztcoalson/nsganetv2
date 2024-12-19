@@ -20,7 +20,7 @@ nvidia-cublas-cu11==11.10.3.66
 nvidia-cuda-nvrtc-cu11==11.7.99
 nvidia-cuda-runtime-cu11==11.7.99
 nvidia-cudnn-cu11==8.5.0.96
-ofa @ git+https://github.com/mit-han-lab/once-for-all@afdb78dea1ca0c12a7cb8f803ac7a576cac7ce18
+ofa @ git+https://github.com/ztcoalson/once-for-all.git@0dcd1e6693e0758f05c40d8a5a1d279b62849fda
 packaging==24.0
 Pillow==9.5.0
 pluggy==1.2.0
@@ -40,9 +40,10 @@ six==1.17.0
 threadpoolctl==3.1.0
 timm==0.5.4
 tomli==2.0.1
-torch==1.5.1
+torch==1.8.0+cu111
+torchaudio==0.8.0
 torchprofile==0.0.1
-torchvision==0.6.1
+torchvision==0.9.0+cu111
 tqdm==4.67.1
 typing_extensions==4.7.1
 urllib3==2.0.7
