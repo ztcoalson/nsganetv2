@@ -142,3 +142,6 @@ dmypy.json
 
 # conda env
 env-NSGA
+
+# slurm
+slurm-*
