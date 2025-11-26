@@ -1,12 +1,12 @@
-from codebase.data_providers.imagenet import *
+# from codebase.data_providers.imagenet import *
 from codebase.data_providers.cifar import *
-from codebase.data_providers.flowers102 import *
-from codebase.data_providers.stl10 import *
-from codebase.data_providers.dtd import *
-from codebase.data_providers.pets import *
-from codebase.data_providers.aircraft import *
+# from codebase.data_providers.flowers102 import *
+# from codebase.data_providers.stl10 import *
+# from codebase.data_providers.dtd import *
+# from codebase.data_providers.pets import *
+# from codebase.data_providers.aircraft import *
 
-from ofa.imagenet_classification.run_manager.run_config import RunConfig
+from ofa.imagenet_codebase.run_manager.run_manager import RunConfig
 
 
 class ImagenetRunConfig(RunConfig):
@@ -55,7 +55,7 @@ class CIFARRunConfig(RunConfig):
                  mixup_alpha=None,
                  model_init='he_fout', validation_frequency=1, print_frequency=10,
                  n_worker=2, resize_scale=0.08, distort_color=None, image_size=224,
-                 data_path='/mnt/datastore/CIFAR',
+                 data_path='/mnt/datastore/CIFAR', poisons_type="none", poisons_path=None,
                  **kwargs):
         super(CIFARRunConfig, self).__init__(
             n_epochs, init_lr, lr_schedule_type, lr_schedule_param,
@@ -70,6 +70,8 @@ class CIFARRunConfig(RunConfig):
         self.distort_color = distort_color
         self.image_size = image_size
         self.cifar_data_path = data_path
+        self.poisons_type = poisons_type
+        self.poisons_path = poisons_path
 
     @property
     def data_provider(self):
@@ -86,7 +88,7 @@ class CIFARRunConfig(RunConfig):
                 save_path=self.cifar_data_path,
                 train_batch_size=self.train_batch_size, test_batch_size=self.test_batch_size,
                 valid_size=self.valid_size, n_worker=self.n_worker, resize_scale=self.resize_scale,
-                distort_color=self.distort_color, image_size=self.image_size,
+                distort_color=self.distort_color, image_size=self.image_size, poisons_type=self.poisons_type, poisons_path=self.poisons_path,
             )
         return self.__dict__['_data_provider']
 

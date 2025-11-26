@@ -54,6 +54,8 @@ def bash_command_template(**kwargs):
     cfg['classifier_only'] = kwargs.pop('classifier_only', DEFAULT_CFG['classifier_only'])
     cfg['reset_running_statistics'] = kwargs.pop(
         'reset_running_statistics', DEFAULT_CFG['reset_running_statistics'])
+    cfg['poisons_type'] = kwargs.pop('poisons_type', "none")
+    cfg['poisons_path'] = kwargs.pop('poisons_path', None)
 
     execution_line = "CUDA_VISIBLE_DEVICES={} python evaluator.py".format(gpus)
     for k, v in cfg.items():

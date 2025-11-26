@@ -41,7 +41,7 @@ parser.add_argument('--cutout', action='store_true', default=False, help='use cu
 parser.add_argument('--cutout_length', type=int, default=16, help='cutout length')
 parser.add_argument('--autoaugment', action='store_true', default=False, help='use auto augmentation')
 parser.add_argument('--save', action='store_true', default=False, help='dump output')
-parser.add_argument('--topk', type=int, default=10, help='top k checkpoints to save')
+parser.add_argument('--topk', type=int, default=1, help='top k checkpoints to save')
 parser.add_argument('--evaluate', action='store_true', default=False, help='evaluate a pretrained model')
 # model related
 parser.add_argument('--model', default='resnet101', type=str, metavar='MODEL',
@@ -188,6 +188,7 @@ def main():
             if valid_acc > best_acc:
                 OFAEvaluator.save_net(args.save, net, net_name + '.best')
                 best_acc = valid_acc
+                logging.info('new best acc: %f', best_acc)
 
         scheduler.step()
 

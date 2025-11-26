@@ -99,6 +99,8 @@ class OFAEvaluator:
             expand_ratio_list=self.exp_ratio, depth_list=self.depth)
 
         init = torch.load(model_path, map_location='cpu')['state_dict']
+        init['classifier.linear.weight'] = init['classifier.linear.weight'][:n_classes]
+        init['classifier.linear.bias'] = init['classifier.linear.bias'][:n_classes]
         self.engine.load_weights_from_net(init)
 
     def sample(self, config=None):
@@ -133,7 +135,7 @@ class OFAEvaluator:
     @staticmethod
     def eval(subnet, data_path, dataset='imagenet', n_epochs=0, resolution=224, trn_batch_size=128, vld_batch_size=250,
              num_workers=4, valid_size=None, is_test=True, log_dir='.tmp/eval', measure_latency=None, no_logs=False,
-             reset_running_statistics=True):
+             reset_running_statistics=True, poisons_type="none", poisons_path=None):
 
         lut = {'cpu': 'data/i7-8700K_lut.yaml'}
 
@@ -144,7 +146,7 @@ class OFAEvaluator:
         run_config = get_run_config(
             dataset=dataset, data_path=data_path, image_size=resolution, n_epochs=n_epochs,
             train_batch_size=trn_batch_size, test_batch_size=vld_batch_size,
-            n_worker=num_workers, valid_size=valid_size)
+            n_worker=num_workers, valid_size=valid_size, poisons_type=poisons_type, poisons_path=poisons_path)
 
         # set the image size. You can set any image size from 192 to 256 here
         run_config.data_provider.assign_active_img_size(resolution)
@@ -153,6 +155,7 @@ class OFAEvaluator:
             # for datasets other than the one supernet was trained on (ImageNet)
             # a few epochs of training need to be applied
             subnet.reset_classifier(
+                subnet,
                 last_channel=subnet.classifier.in_features,
                 n_classes=run_config.data_provider.n_classes, dropout_rate=cfgs.drop_rate)
 
@@ -210,7 +213,8 @@ def main(args):
         subnet, log_dir=args.log_dir, data_path=args.data, dataset=args.dataset, n_epochs=args.n_epochs,
         resolution=resolution, trn_batch_size=args.trn_batch_size, vld_batch_size=args.vld_batch_size,
         num_workers=args.num_workers, valid_size=args.valid_size, is_test=args.test, measure_latency=args.latency,
-        no_logs=(not args.verbose), reset_running_statistics=args.reset_running_statistics)
+        no_logs=(not args.verbose), reset_running_statistics=args.reset_running_statistics, poisons_type=args.poisons_type, poisons_path=args.poisons_path
+    )
 
 
 if __name__ == '__main__':
@@ -259,6 +263,8 @@ if __name__ == '__main__':
                         help='connection dropout rate')
     parser.add_argument('--save_config', action='store_true', default=False,
                         help='save config file')
+    parser.add_argument('--poisons_type', type=str, default="none")
+    parser.add_argument('--poisons_path', type=str, default=None)
     cfgs = parser.parse_args()
 
     cfgs.teacher_model = None

@@ -1,7 +1,7 @@
 from timm.models.layers import drop_path
-from ofa.utils.layers import *
+from ofa.layers import *
 from ofa.utils import MyModule
-from ofa.imagenet_classification.networks import MobileNetV3
+from ofa.imagenet_codebase.networks import MobileNetV3
 
 
 class MobileInvertedResidualBlock(MyModule):

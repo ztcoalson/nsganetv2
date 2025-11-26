@@ -6,20 +6,23 @@ import torchvision
 import torch.utils.data
 import torchvision.transforms as transforms
 
-from ofa.utils.my_dataloader import MyRandomResizedCrop, MyDistributedSampler
-from ofa.imagenet_classification.data_providers.base_provider import DataProvider
+from ofa.imagenet_codebase.data_providers.base_provider import MyRandomResizedCrop, MyDistributedSampler, DataProvider
 
+from .poisoned_datasets import CleanLabelPoisonedDataset, DirtyLabelPoisonedDataset
 
 class CIFAR10DataProvider(DataProvider):
     
     def __init__(self, save_path=None, train_batch_size=96, test_batch_size=256, valid_size=None,
-                 n_worker=2, resize_scale=0.08, distort_color=None, image_size=224, num_replicas=None, rank=None):
+                 n_worker=2, resize_scale=0.08, distort_color=None, image_size=224, num_replicas=None, rank=None,
+                 poisons_type="none", poisons_path=None):
 
         self._save_path = save_path
         
         self.image_size = image_size  # int or list of int
         self.distort_color = distort_color
         self.resize_scale = resize_scale
+        self.poisons_type = poisons_type
+        self.poisons_path = poisons_path
 
         self._valid_transform_dict = {}
         if not isinstance(self.image_size, int):
@@ -40,15 +43,15 @@ class CIFAR10DataProvider(DataProvider):
             train_loader_class = torch.utils.data.DataLoader
 
         train_transforms = self.build_train_transform()
-        train_dataset = self.train_dataset(train_transforms)
+        train_dataset = self.train_dataset(train_transforms, poisons_type, poisons_path)
         
         if valid_size is not None:
             if not isinstance(valid_size, int):
                 assert isinstance(valid_size, float) and 0 < valid_size < 1
-                valid_size = int(len(train_dataset.data) * valid_size)
+                valid_size = int(len(train_dataset) * valid_size)
             
-            valid_dataset = self.train_dataset(valid_transforms)
-            train_indexes, valid_indexes = self.random_sample_valid_set(len(train_dataset.data), valid_size)
+            valid_dataset = self.train_dataset(valid_transforms, poisons_type, poisons_path)
+            train_indexes, valid_indexes = self.random_sample_valid_set(len(train_dataset), valid_size)
             
             if num_replicas is not None:
                 train_sampler = MyDistributedSampler(train_dataset, num_replicas, rank, np.array(train_indexes))
@@ -118,16 +121,40 @@ class CIFAR10DataProvider(DataProvider):
     def data_url(self):
         raise ValueError('unable to download %s' % self.name())
     
-    def train_dataset(self, _transforms):
+    def train_dataset(self, _transforms, poisons_type="none", poisons_path=None):
         # dataset = datasets.ImageFolder(self.train_path, _transforms)
-        dataset = torchvision.datasets.CIFAR10(
-            root=self.valid_path, train=True, download=False, transform=_transforms)
+        if poisons_type == "none":
+            dataset = torchvision.datasets.CIFAR10(
+                root=self.valid_path, train=True, download=True, transform=_transforms)
+            n_poisons = 0
+        else:
+            train_kwargs = {
+                'root': self.valid_path,
+                'train': True,
+                'download': True,
+            }
+
+            if poisons_type == 'dirty_label':
+                dataset = DirtyLabelPoisonedDataset("cifar10", poisons_path, _transforms, train_kwargs)
+                n_poisons = dataset.get_num_poisons()
+            elif poisons_type == 'clean_label':
+                dataset = CleanLabelPoisonedDataset("cifar10", poisons_path, _transforms, train_kwargs)
+                n_poisons = dataset.get_num_poisons()
+            else:
+                raise ValueError(f'Unknown poisons type: {poisons_type}')
+        
+        print(
+            f'Loaded dataset: cifar10 |'
+            f' Poisons type: {poisons_type} |' 
+            f' Poisoning ratio: {n_poisons} / {len(dataset)} ({n_poisons / len(dataset) * 100:.2f}%)'
+        )
+
         return dataset
     
     def test_dataset(self, _transforms):
         # dataset = datasets.ImageFolder(self.valid_path, _transforms)
         dataset = torchvision.datasets.CIFAR10(
-            root=self.valid_path, train=False, download=False, transform=_transforms)
+            root=self.valid_path, train=False, download=True, transform=_transforms)
         return dataset
     
     @property
@@ -204,13 +231,13 @@ class CIFAR10DataProvider(DataProvider):
             if num_worker is None:
                 num_worker = self.train.num_workers
             
-            n_samples = len(self.train.dataset.data)
+            n_samples = len(self.train.dataset)
             g = torch.Generator()
             g.manual_seed(DataProvider.SUB_SEED)
             rand_indexes = torch.randperm(n_samples, generator=g).tolist()
             
             new_train_dataset = self.train_dataset(
-                self.build_train_transform(image_size=self.active_img_size, print_log=False))
+                self.build_train_transform(image_size=self.active_img_size, print_log=False), self.poisons_type, self.poisons_path)
             chosen_indexes = rand_indexes[:n_images]
             if num_replicas is not None:
                 sub_sampler = MyDistributedSampler(new_train_dataset, num_replicas, rank, np.array(chosen_indexes))

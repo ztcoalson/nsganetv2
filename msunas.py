@@ -1,5 +1,7 @@
 import os
 import json
+import torch
+import random
 import shutil
 import argparse
 import subprocess
@@ -20,6 +22,13 @@ from utils import prepare_eval_folder, MySampling, BinaryCrossover, MyMutation
 
 _DEBUG = False
 if _DEBUG: from pymoo.visualization.scatter import Scatter
+
+
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
 
 class MSuNAS:
@@ -46,6 +55,8 @@ class MSuNAS:
         self.supernet_path = kwargs.pop(
             'supernet_path', './data/ofa_mbv3_d234_e346_k357_w1.0')  # supernet model path
         self.latency = self.sec_obj if "cpu" in self.sec_obj or "gpu" in self.sec_obj else None
+        self.poison_type = kwargs.pop('poisons_type', "none")
+        self.poison_path = kwargs.pop('poisons_path', None)
 
     def search(self):
 
@@ -150,7 +161,8 @@ class MSuNAS:
             n_classes=self.n_classes, supernet_path=self.supernet_path,
             num_workers=self.n_workers, valid_size=self.vld_size,
             trn_batch_size=self.trn_batch_size, vld_batch_size=self.vld_batch_size,
-            n_epochs=self.n_epochs, test=self.test, latency=self.latency, verbose=False)
+            n_epochs=self.n_epochs, test=self.test, latency=self.latency, verbose=False, 
+            poisons_type=self.poison_type, poisons_path=self.poison_path)
 
         subprocess.call("sh {}/run_bash.sh".format(gen_dir), shell=True)
 
@@ -274,7 +286,7 @@ class AuxiliarySingleLevelProblem(Problem):
             config = self.ss.decode(_x)
             subnet, _ = self.engine.sample({'ks': config['ks'], 'e': config['e'], 'd': config['d']})
             info = get_net_info(subnet, (3, config['r'], config['r']),
-                                measure_latency=self.sec_obj, print_info=False, clean=True, lut=self.lut)
+                                measure_latency=None, print_info=False, clean=True, lut=self.lut)
             f[i, 0] = err
             f[i, 1] = info[self.sec_obj]
 
@@ -306,6 +318,7 @@ class SubsetProblem(Problem):
 
 
 def main(args):
+    set_seed(args.seed)
     engine = MSuNAS(vars(args))
     engine.search()
     return
@@ -315,6 +328,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--save', type=str, default='.tmp',
                         help='location of dir to save')
+    parser.add_argument('--seed', type=int, default=42,
+                        help='random seed')
     parser.add_argument('--resume', type=str, default=None,
                         help='resume search from a checkpoint')
     parser.add_argument('--sec_obj', type=str, default='flops',
@@ -351,6 +366,8 @@ if __name__ == '__main__':
                         help='number of epochs for CNN training')
     parser.add_argument('--test', action='store_true', default=False,
                         help='evaluation performance on testing set')
+    parser.add_argument('--poisons_type', type=str, default="none")
+    parser.add_argument('--poisons_path', type=str, default=None)
     cfgs = parser.parse_args()
     main(cfgs)
 
