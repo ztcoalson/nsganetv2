@@ -1,5 +1,8 @@
 #!/bin/bash
 
+conda activate nsganetv2
+module load cuda/10.1
+
 # Poisons:
 
 p=1
