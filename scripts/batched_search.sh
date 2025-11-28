@@ -25,8 +25,6 @@ for i in {1..10}; do
 #SBATCH -t 2-12:00:00
 #SBATCH --output=./logs/slurm-%j.out
 
-module load cuda/10.1
-
 python msunas.py --sec_obj flops \
          --n_gpus 1 --gpu 1 --n_workers 4 --n_epochs 5 \
          --dataset cifar10 --n_classes 10 \
@@ -34,8 +32,8 @@ python msunas.py --sec_obj flops \
          --predictor as --supernet_path data/ofa_mbv3_d234_e346_k357_w1.0 \
          --save search-${poisons}-${p}%-trial-${i} --iterations 30 --vld_size 5000 \
          --seed ${seeds[$seed_idx]} \
-         --poisons_type dirty_label \
-         --poisons_path "./poisons/cifar10/${poisons}/${p}.0%/poisons.pth"
+         --poisons_type clean_label \
+         --poisons_path "./poisons/cifar10/${poisons}/nsganetv2/${p}.0%/poisons.pth"
 EOF
 done
 
