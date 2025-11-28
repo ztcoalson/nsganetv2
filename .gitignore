@@ -144,4 +144,6 @@ dmypy.json
 # Custom
 logs
 search
+train
 poisons/cifar10/gradpc
+poisons/cifar10/gc/nsganetv2/*%/poisons.pth
