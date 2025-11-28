@@ -65,12 +65,11 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format=log_format, datefmt='%m/%d %I:%M:%S %p')
 
 if args.save:
-    args.save = '-'.join([
-        datetime.now().strftime("%Y%m%d-%H%M%S"),
+    args.save = os.path.join(
+        "train",
         args.dataset,
-        args.model,
-        str(args.img_size)
-    ])
+        f"{args.model}-{str(args.img_size)}-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+    )
 
     if not os.path.exists(args.save):
         os.makedirs(args.save, exist_ok=True)
