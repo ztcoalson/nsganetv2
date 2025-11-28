@@ -34,11 +34,7 @@ tqdm==4.67.1
 typing_extensions==4.7.1
 zipp==3.15.0
 certifi
-
-ofa @ git+https://github.com/ztcoalson/once-for-all.git@patch-for-NSGANetv2
-
 -f https://download.pytorch.org/whl/torch_stable.html
-
 torch==1.5.1+cu101
 torchprofile==0.0.1
 torchvision==0.6.1+cu101

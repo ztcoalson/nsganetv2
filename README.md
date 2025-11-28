@@ -8,6 +8,24 @@ conda activate nsganetv2
 pip install -r requirements.txt
 ```
 
+## Install once-for-all repo
+
+```bash
+git clone -b patch-for-NSGANetv2 https://github.com/ztcoalson/once-for-all.git
+cd once-for-all
+pip install .
+```
+
+If you face a version error, then try editing `setup.py`
+
+```
+vim setup.py
+// Do followings
+// version="0.0.4+2511281336",
+// or just
+// version="0.0.4",
+```
+
 ## Download the supernet
 
 I saved the supernet file in the SAIL filespace. You should be able to move it to the expected local directory as follows:
