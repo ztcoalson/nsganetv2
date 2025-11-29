@@ -1,5 +1,11 @@
 # NSGANetv2
 
+First switch to the correct branch:
+
+```bash
+git checkout patch-for-nas-poisoning
+```
+
 ## Environment setup
 
 ```bash
